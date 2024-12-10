@@ -1,4 +1,4 @@
-package com.shyam.SpringSecurityDemo.config;
+package com.shyam.book.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,10 +22,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
 
-    // UserDetailsService has own implementation in spring.org framework. But
-    //we want our own implementation because we want to fetch our user from our database
-    // This implementation is done in ApplicationConfig class - in this class we
-    //implemented Bean of UserDetailsService
     private final UserDetailsService userDetailsService;
 
     @Override
@@ -34,7 +30,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
              @NonNull HttpServletResponse response,
              @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-       System.out.println("Begins......");
+        if (request.getServletPath().contains("/api/v1/auth")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;

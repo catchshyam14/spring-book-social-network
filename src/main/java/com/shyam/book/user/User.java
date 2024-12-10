@@ -1,16 +1,26 @@
-package com.shyam.SpringSecurityDemo.user;
+package com.shyam.book.user;
 
+import com.shyam.book.role.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.security.Principal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static jakarta.persistence.FetchType.EAGER;
 
 @Data
 @Builder
@@ -18,34 +28,40 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "_user" )
-public class User implements UserDetails {
+@EntityListeners(AuditingEntityListener.class)
+public class User implements UserDetails , Principal {
 
     @Id
     @GeneratedValue
     private Integer id;
-
     private String firstname;
-
     private String lastname;
-
-    @Column(
-            unique = true
-    )
+    private LocalDate dateOfBirth;
+    @Column(unique = true)
     private String email;
-
     private String password;
+    private boolean accountLocked;
+    private boolean enabled;
 
-    //@Enumerated(EnumType.STRING) annotation ensures that the role is stored in the database as a string (e.g., "ADMIN") rather than its ordinal value (0, 1, etc.).
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @ManyToMany(fetch = EAGER)
+    private List<Role> roles;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    @Column(insertable = false)
+    private LocalDateTime lastModifiedDate;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        //The name() method of an Enum returns the exact name of the Enum constant as a String.
-        //For example:
-        //Role role = Role.ADMIN;
-        //System.out.println(role.name()); // Outputs: "ADMIN"
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return this.roles
+                .stream()
+                .map(r -> new SimpleGrantedAuthority(r.getName()))
+                .collect(Collectors.toList());
     }
 
     //Don't forget to override this method which is a part of UserDetails interface
@@ -66,7 +82,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return !accountLocked;
     }
 
     @Override
@@ -76,6 +92,14 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return enabled;
+    }
+
+    @Override
+    public String getName() {
+        return email;
+    }
+    public String getFullName() {
+        return getFirstname() + " " + getLastname();
     }
 }

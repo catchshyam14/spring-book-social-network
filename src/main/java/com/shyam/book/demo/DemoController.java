@@ -1,4 +1,4 @@
-package com.shyam.SpringSecurityDemo.demo;
+package com.shyam.book.demo;
 
 
 import org.springframework.http.ResponseEntity;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/api/vi/demo-controller")
+@RequestMapping("/api/v1/demo-controller")
 public class DemoController {
 
 

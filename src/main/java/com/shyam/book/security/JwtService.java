@@ -1,4 +1,4 @@
-package com.shyam.SpringSecurityDemo.config;
+package com.shyam.book.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -75,6 +75,7 @@ public class JwtService {
     }
 
     private boolean isTokenExpired(String token) {
+
         return extractExpiration(token).before(new Date());
     }
 

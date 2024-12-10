@@ -1,4 +1,4 @@
-package com.shyam.SpringSecurityDemo.auth;
+package com.shyam.book.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
