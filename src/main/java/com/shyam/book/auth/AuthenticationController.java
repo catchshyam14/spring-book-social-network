@@ -1,23 +1,24 @@
 package com.shyam.book.auth;
 
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-//@RequestMapping("/api/v1/auth")
+@RequestMapping("auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
 
     private final AuthenticationService service;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<?> register(
             @RequestBody RegisterRequest request
-    ){
-        return  ResponseEntity.ok(service.register(request));
+    ) throws MessagingException {
+
+        service.register(request);
+        return ResponseEntity.accepted().build();
     }
 
     @PostMapping("/authenticate")
@@ -25,5 +26,12 @@ public class AuthenticationController {
             @RequestBody AuthenticationRequest request
     ){
         return  ResponseEntity.ok(service.authenticate(request));
+    }
+
+    @GetMapping("/activate-account")
+    public void confirm(
+            @RequestParam String token
+    ) throws MessagingException {
+        service.activateAccount(token);
     }
 }
